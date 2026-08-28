@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>There Is No Oil Price — An Interactive Primer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --paper:#EDF1EA;
+  --water:#DDE7E3;
+  --ink:#16262D;
+  --ink-soft:#3D5058;
+  --magenta:#A81C69;
+  --sounding:#3F6D8A;
+  --buff:#E6DCC4;
+  --line:rgba(22,38,45,.16);
+  --card:#FFFFFF;
+  --navbg:rgba(237,241,234,.94);
+  --grid:rgba(63,109,138,.055);
+  --shadow:rgba(22,38,45,.12);
+  --ok:#2C6E49;--okbg:rgba(44,110,73,.08);
+  --warn:#9A6A00;
+  --radius:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    color-scheme:dark;
+    --paper:#0F1A20;
+    --water:#18272F;
+    --ink:#E9EFEA;
+    --ink-soft:#A9BCBE;
+    --magenta:#EE6BAB;
+    --sounding:#85B1CD;
+    --buff:#26333B;
+    --line:rgba(233,239,234,.18);
+    --card:#152530;
+    --navbg:rgba(15,26,32,.94);
+    --grid:rgba(133,177,205,.07);
+    --shadow:rgba(0,0,0,.45);
+    --ok:#7FD6A4;--okbg:rgba(127,214,164,.1);
+    --warn:#E8C36A;
+  }
+  .tank .fill{background:linear-gradient(180deg,#4A7A99,#2A4A5C)}
+  .ladder li:nth-child(3) .rung-cost{background:#C9A63A;color:#0F1A20}
+  .ladder li:nth-child(4) .rung-cost,.ladder li:nth-child(5) .rung-cost{color:#0F1A20}
+  .ladder li:nth-child(1) .rung-cost,.ladder li:nth-child(2) .rung-cost{color:#0F1A20}
+  .part-label{color:#0F1A20}
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{
+  font-family:'Newsreader',serif;
+  font-size:17px;line-height:1.6;
+  color:var(--ink);
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:56px 56px;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 20px}
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:var(--navbg);backdrop-filter:blur(6px);
+  border-bottom:1.5px solid var(--line);
+  overflow-x:auto;white-space:nowrap;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none}
+nav .inner{display:flex;gap:2px;padding:0 12px}
+nav a{
+  font-family:'Archivo',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-soft);text-decoration:none;
+  padding:12px 10px;border-bottom:3px solid transparent;
+}
+nav a:hover,nav a:focus-visible{color:var(--magenta);border-bottom-color:var(--magenta)}
+/* ---------- hero ---------- */
+header{padding:56px 0 40px;border-bottom:1.5px solid var(--ink)}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--sounding);margin-bottom:14px;
+}
+h1{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 110;
+  font-weight:850;font-size:clamp(34px,7.5vw,58px);
+  line-height:1.02;letter-spacing:-.01em;margin-bottom:18px;
+}
+.hero-num{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:clamp(46px,11vw,84px);font-weight:600;
+  color:var(--magenta);line-height:1;margin:26px 0 8px;
+  font-variant-numeric:tabular-nums;
+}
+.hero-cap{font-size:15px;color:var(--ink-soft);font-style:italic;max-width:52ch}
+.lede{font-size:19px;max-width:60ch;margin-top:18px}
+.src{
+  margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);
+}
+.src a{color:var(--sounding)}
+/* ---------- sections ---------- */
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+.part-label{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--paper);background:var(--ink);
+  padding:4px 10px;border-radius:3px;margin-bottom:12px;
+}
+h2{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 105;
+  font-weight:800;font-size:clamp(24px,5vw,34px);line-height:1.1;margin-bottom:14px;
+}
+h3{
+  font-family:'Archivo',sans-serif;font-weight:700;font-size:17px;
+  margin:26px 0 8px;
+}
+p{margin-bottom:14px;max-width:64ch}
+em{font-style:italic}
+.note{
+  border-left:3px solid var(--magenta);padding:10px 14px;
+  background:rgba(168,28,105,.06);font-size:15.5px;margin:18px 0;max-width:60ch;
+}
+.stat-row{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+.stat{
+  flex:1 1 150px;background:var(--water);border:1px solid var(--line);
+  border-radius:var(--radius);padding:14px;
+}
+.stat .n{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;color:var(--sounding)}
+.stat .l{font-family:'Archivo',sans-serif;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-top:4px}
+/* ---------- tank widget ---------- */
+.widget{
+  background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius);
+  padding:20px;margin:24px 0;box-shadow:4px 4px 0 var(--shadow);
+}
+.widget h4{font-family:'Archivo',sans-serif;font-weight:800;font-size:15px;letter-spacing:.02em;text-transform:uppercase;margin-bottom:4px}
+.widget .sub{font-size:14px;color:var(--ink-soft);margin-bottom:16px}
+.tank-area{display:flex;gap:18px;align-items:stretch}
+.tank{
+  position:relative;width:86px;min-height:190px;flex-shrink:0;
+  border:2.5px solid var(--ink);border-top:none;border-radius:0 0 8px 8px;
+  background:repeating-linear-gradient(0deg,transparent,transparent 18px,var(--line) 18px,var(--line) 19px);
+  overflow:hidden;
+}
+.tank .fill{
+  position:absolute;bottom:0;left:0;right:0;height:79%;
+  background:linear-gradient(180deg,#2f4a58,#16262D);
+  transition:height .35s ease;
+}
+.tank .heel{
+  position:absolute;bottom:0;left:0;right:0;height:20%;
+  border-top:2px dashed var(--magenta);pointer-events:none;
+}
+.tank .tickmax{
+  position:absolute;top:0;left:0;right:0;border-top:2px dashed var(--magenta);
+}
+.tank-read{flex:1;min-width:0}
+.tank-read .big{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:var(--sounding)}
+.tank-read .msg{font-size:15px;margin-top:8px;min-height:88px}
+input[type=range]{
+  width:100%;margin:14px 0 4px;accent-color:var(--magenta);height:28px;
+}
+.chip{
+  display:inline-block;font-family:'Archivo',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;
+  border:1.5px solid currentColor;margin-bottom:6px;
+}
+.chip.danger{color:var(--magenta)}
+.chip.ok{color:var(--ok)}
+.chip.warn{color:var(--warn)}
+/* ---------- ladder ---------- */
+.ladder{list-style:none;margin:20px 0}
+.ladder li{margin-bottom:8px}
+.ladder button{
+  width:100%;text-align:left;cursor:pointer;
+  font-family:'Archivo',sans-serif;font-weight:700;font-size:15px;
+  color:var(--ink);background:var(--water);
+  border:1.5px solid var(--ink);border-radius:8px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;
+  transition:background .15s;
+}
+.ladder button:hover{background:var(--buff)}
+.ladder .rung-cost{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
+  color:var(--paper);background:var(--sounding);
+  padding:3px 8px;border-radius:4px;flex-shrink:0;min-width:74px;text-align:center;
+}
+.ladder li:nth-child(3) .rung-cost{background:#7A6320}
+.ladder li:nth-child(4) .rung-cost,.ladder li:nth-child(5) .rung-cost{background:var(--magenta)}
+.ladder .detail{
+  display:none;font-family:'Newsreader',serif;font-weight:400;font-size:15px;
+  padding:12px 14px 4px;color:var(--ink-soft);
+}
+.ladder li.open .detail{display:block}
+.ladder .arrow{margin-left:auto;transition:transform .2s;flex-shrink:0}
+.ladder li.open .arrow{transform:rotate(180deg)}
+.law{
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(18px,4vw,24px);
+  line-height:1.25;margin:24px 0;max-width:26ch;
+}
+.law mark{background:none;color:var(--magenta)}
+/* ---------- tabs ---------- */
+.tabs{display:flex;gap:6px;margin-bottom:0}
+.tabs button{
+  flex:1;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:800;font-size:14px;
+  letter-spacing:.03em;text-transform:uppercase;
+  padding:11px 6px;border:1.5px solid var(--ink);border-bottom:none;
+  border-radius:8px 8px 0 0;background:var(--water);color:var(--ink-soft);
+}
+.tabs button[aria-selected=true]{background:var(--card);color:var(--magenta)}
+.tabpanel{
+  background:var(--card);border:1.5px solid var(--ink);border-radius:0 0 var(--radius) var(--radius);
+  padding:18px;display:none;
+}
+.tabpanel.active{display:block}
+.tabpanel .trade{
+  font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.7;
+  background:var(--paper);border:1px dashed var(--sounding);
+  border-radius:6px;padding:12px;margin-top:12px;color:var(--ink-soft);
+}
+/* ---------- curve ---------- */
+.curve-toggle{display:flex;gap:8px;margin-bottom:14px}
+.curve-toggle button{
+  flex:1;cursor:pointer;font-family:'Archivo',sans-serif;font-weight:700;font-size:13px;
+  text-transform:uppercase;letter-spacing:.04em;padding:10px;
+  border:1.5px solid var(--ink);border-radius:8px;background:var(--water);color:var(--ink-soft);
+}
+.curve-toggle button.on{background:var(--ink);color:var(--paper)}
+.curve-svg{width:100%;height:auto;display:block}
+.curve-svg path.main{fill:none;stroke:var(--magenta);stroke-width:3.5;transition:d .45s ease}
+.curve-msg{font-size:15px;margin-top:12px;min-height:72px}
+/* ---------- chokepoints ---------- */
+.choke{list-style:none;margin-top:18px}
+.choke li{margin-bottom:10px}
+.choke button{
+  width:100%;cursor:pointer;text-align:left;background:none;border:none;padding:0;
+  font-family:inherit;color:inherit;
+}
+.choke .row{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+.choke .name{font-family:'Archivo',sans-serif;font-weight:800;font-size:15px}
+.choke .vol{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--sounding);margin-left:auto}
+.choke .bar{
+  height:16px;background:var(--water);border:1.5px solid var(--ink);border-radius:4px;overflow:hidden;
+}
+.choke .bar span{
+  display:block;height:100%;background:var(--sounding);width:0;
+  transition:width .8s cubic-bezier(.2,.7,.3,1);
+}
+.choke li.hot .bar span{background:var(--magenta)}
+.choke .cdetail{display:none;font-size:14.5px;color:var(--ink-soft);padding:8px 2px 0;max-width:62ch}
+.choke li.open .cdetail{display:block}
+/* ---------- svg theming ---------- */
+.curve-svg line{stroke:var(--ink)}
+.curve-svg text{fill:var(--ink-soft)}
+#spotLine{stroke:var(--magenta)}
+#tcLine{stroke:var(--sounding)}
+.sw-m{background:var(--magenta)!important}
+.sw-s{background:var(--sounding)!important}
+/* ---------- freight ---------- */
+.spark-legend{display:flex;gap:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin-top:8px;flex-wrap:wrap}
+.spark-legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px}
+/* ---------- quiz ---------- */
+.q{margin-bottom:22px}
+.q p{font-weight:600;font-family:'Archivo',sans-serif;font-size:15px;margin-bottom:8px}
+.q .opts{display:flex;flex-direction:column;gap:6px}
+.q .opts button{
+  text-align:left;cursor:pointer;font-family:'Newsreader',serif;font-size:15.5px;
+  padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);
+}
+.q .opts button:hover{border-color:var(--ink)}
+.q .opts button.right{border-color:var(--ok);background:var(--okbg)}
+.q .opts button.wrong{border-color:var(--magenta);background:rgba(168,28,105,.07)}
+.q .exp{display:none;font-size:14.5px;color:var(--ink-soft);margin-top:8px;border-left:3px solid var(--sounding);padding-left:12px}
+.q.done .exp{display:block}
+/* ---------- takeaways / footer ---------- */
+.take{list-style:none;counter-reset:tk;margin-top:16px}
+.take li{
+  counter-increment:tk;position:relative;padding-left:44px;margin-bottom:14px;max-width:62ch;
+}
+.take li::before{
+  content:counter(tk,decimal-leading-zero);
+  position:absolute;left:0;top:2px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--magenta);
+  border:1.5px solid var(--magenta);border-radius:4px;padding:1px 5px;
+}
+footer{padding:36px 0 56px;font-size:14px;color:var(--ink-soft)}
+footer a{color:var(--sounding)}
+@media(max-width:520px){
+  .tank-area{flex-direction:row}
+  .tabs button{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<nav aria-label="Sections">
+  <div class="inner">
+    <a href="#negative">−$37.63</a>
+    <a href="#ladder">The Ladder</a>
+    <a href="#gaps">3 Gaps</a>
+    <a href="#curve">The Curve</a>
+    <a href="#chokepoints">Chokepoints</a>
+    <a href="#freight">Freight</a>
+    <a href="#quiz">Check Yourself</a>
+    <a href="#takeaways">Takeaways</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">The Oil Primer · Midstream · Interactive Edition</div>
+    <h1>There Is No<br>Oil Price</h1>
+    <div class="hero-num" id="heroNum">$0.00</div>
+    <div class="hero-cap">WTI settlement, 20 April 2020. No war started. No refinery blew up. Supply and demand were unchanged from the Friday before. Traders paid strangers nearly $40 a barrel to take oil off their hands.</div>
+    <p class="lede">The number on your screen isn't "the price of oil." It's the price of oil <em>somewhere specific</em>, net of everything standing between the barrel and its buyer: ships, tanks, pipes, insurance paperwork, and permission. This primer distills how that middle layer actually works, and why it's where the money lands when the world breaks.</p>
+    <div class="src">Based on "There Is No Oil Price" by Strategist &amp; Giacomo Prandelli (TSCS, Jul 2026) · <a href="https://tscsw.substack.com/p/there-is-no-oil-price" target="_blank" rel="noopener">read the original</a></div>
+  </div>
+</header>
+
+<section id="negative">
+  <div class="wrap">
+    <span class="part-label">Part 1</span>
+    <h2>The Day Oklahoma Broke the World Price</h2>
+    <p>Spring 2020: demand had cratered by ~20m barrels a day while the Saudis and Russians flooded the market. But cheap oil doesn't explain a <em>negative</em> price. What does is a tank farm in Cushing, Oklahoma.</p>
+    <p>A WTI futures contract is just a number on a screen — until expiry day, when whoever holds it has promised to take physical delivery of 1,000 barrels at Cushing. By 17 April, roughly 60m of Cushing's 76m barrels of working storage were full, and every remaining gallon was leased or spoken for. A crowd of paper longs woke up holding delivery obligations in a town with no room.</p>
+    <p><strong>Brent settled positive that same afternoon.</strong> Deferred WTI contracts never went negative. Nothing was wrong with oil. The middle was full.</p>
+
+    <div class="widget">
+      <h4>Cushing Storage Simulator</h4>
+      <div class="sub">Drag the slider. The market behaves very differently at the top of the tank than at the bottom.</div>
+      <div class="tank-area">
+        <div class="tank" aria-hidden="true">
+          <div class="tickmax"></div>
+          <div class="fill" id="tankFill"></div>
+          <div class="heel"></div>
+        </div>
+        <div class="tank-read">
+          <span class="chip" id="tankChip">—</span>
+          <div class="big"><span id="tankVal">60</span>m bbls</div>
+          <div class="msg" id="tankMsg"></div>
+        </div>
+      </div>
+      <input type="range" id="tankSlider" min="15" max="76" value="60" aria-label="Cushing storage level in million barrels">
+    </div>
+
+    <div class="note"><strong>The true floor of any deliverable commodity is not zero.</strong> It's minus the cost of destroying it. When the middle is overloaded, a bonfire becomes the economically rational response.</div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="n">76%</div><div class="l">of world oil supply moves by sea (79.8 of 104.4m bbl/d)</div></div>
+      <div class="stat"><div class="n">7×</div><div class="l">shipping consumed when a Russian barrel sails to India instead of Rotterdam</div></div>
+      <div class="stat"><div class="n">$15bn</div><div class="l">Vitol net profit in the 2022 dislocation — the middle's payday</div></div>
+    </div>
+    <p>Rerouting is a demand shock with no new demand: the Baltic-to-Rotterdam run is ~1,250 nautical miles; the same cargo to India's west coast is ~8,750. Distance beats volume. In shipping, demand is barrels × distance ("tonne-miles"), and sanctions manufactured one of history's biggest tanker employment schemes out of pure geometry.</p>
+  </div>
+</section>
+
+<section id="ladder">
+  <div class="wrap">
+    <span class="part-label">Part 2</span>
+    <h2>The Cost Ladder</h2>
+    <p>Every barrel sits on a ladder of deliverable prices. It's worth one price if it can reach a benchmark-quality buyer, less if it can only go regional, less still if it's stuck behind a full pipeline, and nothing if it can't legally or physically move. Barrels always seek the cheapest machine with spare capacity — and when that machine fills, the price gap widens until the next, more expensive machine turns on.</p>
+    <div class="law">Barrels flow to the cheapest machine with capacity. <mark>When it fills, the differential widens.</mark></div>
+    <p style="font-size:14.5px;color:var(--ink-soft)">One law, and it explains Alberta's $40 discounts, Waha's negative gas, and every regional blowout in modern history. Tap each rung:</p>
+
+    <ul class="ladder" id="ladderList">
+      <li>
+        <button aria-expanded="false"><span class="rung-cost">CHEAPEST</span>Trunk Pipeline<span class="arrow">▾</span></button>
+        <div class="detail">Humanity's cheapest way to move oil on land. Batches of different grades run in sequence down the same pipe. Capacity is sold two ways: committed shippers on take-or-pay contracts, and walk-up shippers at posted tariffs. When nominations exceed capacity, the pipe goes into <em>apportionment</em> — the single most information-dense word in the pipeline world. An apportioned pipe is a full rung.</div>
+      </li>
+      <li>
+        <button aria-expanded="false"><span class="rung-cost">CHEAP</span>Tanker (VLCC → Aframax)<span class="arrow">▾</span></button>
+        <div class="detail">At the waterline the machines become mobile. A VLCC carries ~2m barrels for long hauls; Suezmax ~1m; Aframax ~700k for shorter runs and shallower ports — and, not coincidentally, the shadow fleet's favorite size. Key one-way door: a clean product tanker can switch to dirty crude easily, but going back requires costly cleaning and re-certification. A 15-year-old tanker can be commercially dead to the mainstream market and simultaneously the hottest asset in the sanctioned one.</div>
+      </li>
+      <li>
+        <button aria-expanded="false"><span class="rung-cost">MID</span>Storage Tanks<span class="arrow">▾</span></button>
+        <div class="detail">Two businesses in one steel shell: cycling (throughput fees on barrels passing through) and carrying (renting time to contango traders). Below working capacity sits the <em>heel</em> — the minimum fill needed to blend and push barrels out at rate. Tank <strong>tops</strong> break the market (April 2020). Tank <strong>bottoms</strong> strain it with basis stress and squeeze risk (Cushing near 20m bbls in June 2026). Storage is ultimately a trust business — somebody has to occasionally open the door and count.</div>
+      </li>
+      <li>
+        <button aria-expanded="false"><span class="rung-cost">EXPENSIVE</span>Rail<span class="arrow">▾</span></button>
+        <div class="detail">A multiple of pipeline cost — the overflow valve. Crude-by-rail volume is a direct public gauge of how badly the cheaper rungs have filled. When you see railcars full of bitumen, you're watching the ladder law execute in public: the differential widened until the expensive machine switched on.</div>
+      </li>
+      <li>
+        <button aria-expanded="false"><span class="rung-cost">TOP RUNG</span>Truck<span class="arrow">▾</span></button>
+        <div class="detail">The dearest rung, and the rate card understates it. A road is a living organism: dust suppression, self-funded repairs, and relationships with everyone who lives along the route. A community that closes the road has removed a rung from your ladder without touching a machine. The bottom layer of the permission stack is consent.</div>
+      </li>
+    </ul>
+
+    <h3>Tolls vs. Options — the category error that costs money</h3>
+    <p>Midstream assets earn in two modes. A <strong>toll</strong> is a contracted pipeline or take-or-pay terminal: volume × fee, indifferent to oil price, valued like infrastructure debt. An <strong>option</strong> is a spot tanker, an uncommitted tank, a flexible book: worth little in calm markets and worth anything in broken ones. Confusing the two is an expensive mistake — tanker equities are effectively listed call options, which is why they look cheap at every top and broken at every bottom. Buying them off a P/E screen is the classic trap.</p>
+  </div>
+</section>
+
+<section id="gaps">
+  <div class="wrap">
+    <span class="part-label">Part 3</span>
+    <h2>Space, Time, Form</h2>
+    <p>Everything in the middle gets paid for closing one of three gaps: <em>where</em> a barrel is vs. where it's wanted, <em>when</em> it exists vs. when it's needed, and <em>what</em> it is vs. what the buyer's equipment can digest. A VLCC, a salt cavern, and a diluent contract are the same business pointed at different gaps. (A fourth gap — barrels that may legally move vs. those that may not — is the sanctions trade.)</p>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="0">Space</button>
+      <button role="tab" aria-selected="false" data-tab="1">Time</button>
+      <button role="tab" aria-selected="false" data-tab="2">Form</button>
+    </div>
+    <div class="tabpanel active" role="tabpanel">
+      <p><strong>Freight &amp; tariffs.</strong> Tanker freight is quoted in Worldscale points — a taxi meter recalibrated once a year. WS100 is the published flat rate for a route; WS310 (where Gulf-to-China fixed in late June 2026) means the meter is running at 3.1× its calibrated norm. What the owner actually earns is the TCE: gross freight minus bunkers, port and canal fees, divided by round-trip days — including the empty ballast leg home.</p>
+      <p>A route is open when the price gap between two locations exceeds the cost of covering the distance. That single sentence is the entire theory of oil arbitrage.</p>
+      <div class="trade">THE TRADE — see a $2/bbl spread between two ports?<br>Anyone can see it on a screen. Only someone with a chartered ship and a berth slot can turn it into cash.</div>
+    </div>
+    <div class="tabpanel" role="tabpanel">
+      <p><strong>Storage &amp; the curve.</strong> The futures curve is the published price of time. In contango (deferred above spot) the market pays anyone who can warehouse the surplus: buy spot, sell the deferred future, store, deliver. In backwardation (spot above deferred) storage earns nothing and inventories drain.</p>
+      <p>Spring 2020 blew the spreads out past tank rent, past financing, until they covered the most expensive warehouse on earth: VLCCs hired to sit still. Floating storage peaked near 200m barrels. Euronav booked $485m of net profit in H1 2020; Vitol cleared $3bn for the year — the same event that printed −$37.63, seen from the winning side.</p>
+      <div class="trade">THE SIGNAL — the moment floating storage starts building, the contango has already blown past the marginal onshore tank. The surplus is worse than the official data admits.</div>
+    </div>
+    <div class="tabpanel" role="tabpanel">
+      <p><strong>Blending &amp; the spec cliff.</strong> A crude grade or refined product is a pass-fail exam. Marine fuel at 0.50% sulphur is a compliant commodity; at 0.51% it's a different, cheaper product with a smaller buyer pool. Price doesn't slope across that boundary — it steps.</p>
+      <p>Canada's bitumen is too viscous to pipe at all, so every barrel of Western Canadian Select embeds a form trade: ~30% purchased condensate. And IMO 2020 — one UN regulation about smokestacks — repriced a refining stream, a blending complex, and the relative value of every large ship on earth overnight.</p>
+      <div class="trade">THE TRADE — buy the failing stream at its discount, buy a correcting stream, blend in a tank until it passes, sell at the compliant price. Done daily at scale in Rotterdam, Fujairah, Singapore.</div>
+    </div>
+
+    <div class="note"><strong>There was no directional bet.</strong> Trading houses don't get rich guessing whether oil goes up or down — flat price is the most competitive, most arbitraged market on earth. They spend a decade paying premiums on physical options (ships, tanks, terminals, prepay financing — billions a year of committed cost), then all the options strike at once when a chokepoint tightens. The house doesn't have to be right. It has to be present, insured, and staffed.</div>
+  </div>
+</section>
+
+<section id="curve">
+  <div class="wrap">
+    <span class="part-label">Part 4</span>
+    <h2>Read the Curve</h2>
+    <p>The curve's shape is the market's own signed daily statement about whether the physical present is heavy or tight. Toggle between the two regimes:</p>
+
+    <div class="widget">
+      <div class="curve-toggle">
+        <button id="btnContango" class="on">Contango</button>
+        <button id="btnBackward">Backwardation</button>
+      </div>
+      <svg class="curve-svg" viewBox="0 0 400 180" aria-hidden="true">
+        <line x1="30" y1="150" x2="380" y2="150" stroke="#16262D" stroke-width="1.5"/>
+        <line x1="30" y1="20" x2="30" y2="150" stroke="#16262D" stroke-width="1.5"/>
+        <text x="35" y="168" font-family="IBM Plex Mono" font-size="11" fill="#3D5058">spot</text>
+        <text x="330" y="168" font-family="IBM Plex Mono" font-size="11" fill="#3D5058">deferred</text>
+        <text x="8" y="30" font-family="IBM Plex Mono" font-size="11" fill="#3D5058">$</text>
+        <path id="curvePath" class="main" d="M 40 130 C 150 128, 260 70, 370 40"/>
+      </svg>
+      <div class="curve-msg" id="curveMsg"><strong>Contango:</strong> too much oil today. Deferred months trade above spot, and the curve is offering to pay anyone who can warehouse the surplus. If the spread beats storage + financing costs, the profit is locked the day both legs go on.</div>
+    </div>
+
+    <h3>The price is manufactured, not discovered</h3>
+    <p>"Brent" is assembled daily by named organizations out of a small set of physically deliverable cargoes under written eligibility rules. The North Sea stream now loads so little that Texas cargoes delivered into Rotterdam are netted back to a notional North Sea price using a published freight adjustment — the world's oil reference literally contains a tanker assessment as a term in its equation.</p>
+    <p>When war shut Hormuz in March 2026, Platts suspended any Dubai-deliverable grade requiring strait transit. The pool collapsed from five grades to two — Oman and Murban, the two that load <em>outside</em> the strait. Benchmark eligibility followed the bypass map. Dubai printed a record $157.66, and some Asian refiners re-papered purchases off ICE Brent because their benchmark had become unusable.</p>
+    <div class="note"><strong>Methodology risk is market risk.</strong> A grade admitted to a benchmark gains a structural bid; a terminal struck off strands the barrels behind it. In March 2026, two subscriber notes from a price-reporting agency arguably moved more money than any OPEC statement of the year. Almost nobody reads methodology notices. Read them.</div>
+  </div>
+</section>
+
+<section id="chokepoints">
+  <div class="wrap">
+    <span class="part-label">Part 5</span>
+    <h2>The Chokepoints</h2>
+    <p>Sort them by <em>substitutability</em>, not size. Malacca is the biggest by volume but has workarounds. Hormuz has ~4.7m bbl/d of pipeline bypass against a 20.9m flow and no maritime alternative at all — which is why one strait carries the world's risk premium. Tap a bar for detail. Magenta = elevated risk in the 2026 crisis.</p>
+
+    <ul class="choke" id="chokeList">
+      <li class="hot" data-vol="23.2">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Strait of Malacca</span><span class="vol">23.2m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">The largest chokepoint on earth — not Hormuz. Closure wouldn't be existential: Indonesian straits and the Myanmar pipeline offer workarounds. It carries China's nightmares more than the market's premium.</div>
+      </li>
+      <li class="hot" data-vol="20.9">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Strait of Hormuz</span><span class="vol">20.9m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">The largest by irreplaceability: ~4.7m bbl/d of pipeline bypass, no sea alternative. 89% of its crude goes to Asia. In the 2026 war, transits collapsed from ~135 tanker passages a day to under 10. The technically correct definition of the Hormuz premium: the cost of not owning a pipeline to Fujairah.</div>
+      </li>
+      <li data-vol="9.1">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Cape of Good Hope</span><span class="vol">9.1m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">Not a chokepoint — the anti-chokepoint. The world's detour, and rising. Eight years of Cape economics after the 1967 Suez closure is what summoned the supertanker into existence. The VLCC is a monument to a closed canal.</div>
+      </li>
+      <li data-vol="4.9">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Suez + SUMED</span><span class="vol">4.9m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">Closed 1956 (5 months) and 1967 (8 years) — long outages permanently rewrite fleet architecture. And 2021's Ever Given proved you don't need a war: one wedged ship, 6 days, 400+ queued vessels, ~$9bn a day of held-up trade.</div>
+      </li>
+      <li data-vol="4.9">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Danish Straits</span><span class="vol">4.9m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">Swollen by the rewired Russian trade — the exit route for Baltic-loading barrels heading the long way to Asia.</div>
+      </li>
+      <li class="hot" data-vol="4.2">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Bab el-Mandeb</span><span class="vol">4.2m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">Roughly halved from 2023 by the Red Sea campaign. Critically: the Saudi East-West bypass pipe discharges at Yanbu on the Red Sea — so a barrel that escapes Hormuz through it still has to pass here to reach Asia. Bypasses have chokepoints too. A strait doesn't have to close to stop working; it only has to become a place where underwriters won't quote.</div>
+      </li>
+      <li data-vol="3.7">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Turkish Straits</span><span class="vol">3.7m bbl/d</span></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">Kazakhstan is the largest single exporter here — via the CPC pipeline that runs through Russian territory to a Russian port. A single point of failure dressed as a trade route.</div>
+      </li>
+      <li data-vol="2.3">
+        <button aria-expanded="false">
+          <div class="row"><span class="name">Panama Canal</span><span class="vol">2.3m bbl/d</span></div>
+          <div class="cdetail"></div>
+          <div class="bar"><span></span></div>
+        </button>
+        <div class="cdetail">The network breathes as one system: with Hormuz throttled, Panama ran 40–41 ships a day against a normal 34–35. Squeeze one node and pressure shows up at every other node within the month.</div>
+      </li>
+    </ul>
+
+    <h3>Where the war premium actually landed</h3>
+    <p>Flat price reacted instantly and forgot fastest — futures are what you can sell at 2 a.m. on a headline. The premium that <em>stayed</em> was administered: war-risk insurance went from ~0.25% of hull value pre-war to quotes near 10% at the peak, settling at 3–8% — that's $3–8 million per Hormuz voyage, payable before the ship moves. Invoice-level evidence showed the war's cost landing almost entirely in the underwriters' line, even on routes that physically bypass the strait, because war risk is priced by whether your destination sits inside the Joint War Committee's listed area — not by the danger your voyage actually runs.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="n">$40bn</div><div class="l">US-built Gulf reinsurance facility — policies written by May: zero</div></div>
+      <div class="stat"><div class="n">325.7m</div><div class="l">US SPR barrels, lowest since 1983, after ~89.5m of crisis releases</div></div>
+      <div class="stat"><div class="n">7/10</div><div class="l">Russian crude barrels still moving on shadow-fleet tonnage</div></div>
+    </div>
+    <p><strong>The shadow fleet is a caste system, not a cycle.</strong> The authors' own hypothesis — that compliant tonnage returns whenever Urals dips below the price cap — was killed by the data: the G7-linked carriage share sat in a 23–33% band while Urals swung from $56 to $112 and back. Opaque ownership and non-Western insurance are sunk investments that don't un-sink when prices dip. Two-tier tanker markets are architecture.</p>
+  </div>
+</section>
+
+<section id="freight">
+  <div class="wrap">
+    <span class="part-label">Part 4–5</span>
+    <h2>The Hidden Violence of Options</h2>
+    <p>Spot tanker rates don't move like other asset classes. They gap. Toggle between the two great spikes:</p>
+
+    <div class="widget">
+      <div class="curve-toggle">
+        <button id="btn2020" class="on">2020: Storage Panic</button>
+        <button id="btn2026" >2026: Hormuz War</button>
+      </div>
+      <svg class="curve-svg" viewBox="0 0 400 200" aria-hidden="true">
+        <line x1="42" y1="170" x2="385" y2="170" stroke="#16262D" stroke-width="1.5"/>
+        <line x1="42" y1="15" x2="42" y2="170" stroke="#16262D" stroke-width="1.5"/>
+        <text id="yMax" x="4" y="24" font-family="IBM Plex Mono" font-size="10" fill="#3D5058">$265k</text>
+        <text x="4" y="172" font-family="IBM Plex Mono" font-size="10" fill="#3D5058">$0</text>
+        <text id="xL1" x="46" y="188" font-family="IBM Plex Mono" font-size="10" fill="#3D5058">Feb</text>
+        <text id="xL2" x="200" y="188" font-family="IBM Plex Mono" font-size="10" fill="#3D5058">Mar</text>
+        <text id="xL3" x="350" y="188" font-family="IBM Plex Mono" font-size="10" fill="#3D5058">Aug</text>
+        <polyline id="spotLine" points="" fill="none" stroke="#A81C69" stroke-width="3.5" stroke-linejoin="round"/>
+        <line id="tcLine" x1="42" y1="0" x2="385" y2="0" stroke="#3F6D8A" stroke-width="2.5" stroke-dasharray="7 5" style="display:none"/>
+      </svg>
+      <div class="spark-legend">
+        <span><i class="sw-m"></i>Spot VLCC rate / day</span>
+        <span id="tcLegend" style="display:none"><i class="sw-s"></i>12-mo time charter ≈ $110k</span>
+      </div>
+      <div class="curve-msg" id="freightMsg"><strong>March 2020:</strong> VLCC rates went from $30,000/day to $265,000/day in a week as the contango recruited ships as floating warehouses — then back to $17,000 by August. All inside five months.</div>
+    </div>
+
+    <p>Through the 2026 spike, spot printed near $470,000/day while 12-month charters held around $110,000. That gap is itself a price — of mean-reversion expectations, charterer discipline, owner refusal to sell convexity cheap, or an uncertainty band too wide to price. The working rule: <strong>take a disruption thesis seriously not when spot spikes, but when the one-year money agrees.</strong></p>
+
+    <h3>The window has a closing date</h3>
+    <p>The tanker fleet is simultaneously the oldest in decades (VLCCs averaging 13.7 years, a fifth of the crude fleet past 20) <em>and</em> carrying its largest orderbook since 2011 (22% of the fleet by April 2026). Not one tanker was demolished in May — sanctioned trades pay geriatric ships too well to die. Age, full yards, and war-trade hold the market tight until roughly 2027; then ships arrive on public schedules anyone can read. Some of the best trades in shipping history came from windows. Nobody reads the closing date. Shipping has spent 200 years proving this.</p>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <span class="part-label">Check Yourself</span>
+    <h2>Three Questions</h2>
+
+    <div class="q" data-ans="1">
+      <p>1. Why did WTI go to −$37.63 while Brent stayed positive the same afternoon?</p>
+      <div class="opts">
+        <button>Global demand collapsed harder for US crude</button>
+        <button>WTI requires physical delivery at Cushing, and Cushing's tanks were effectively full</button>
+        <button>OPEC targeted the US market specifically</button>
+      </div>
+      <div class="exp">The glut was global, but the negative price was local: WTI holders were contractually obliged to receive barrels in a landlocked town with no spare tank space. Brent, seaborne and deliverable elsewhere, never faced that wall.</div>
+    </div>
+
+    <div class="q" data-ans="0">
+      <p>2. Which premium was "stickiest" during the 2026 Hormuz crisis?</p>
+      <div class="opts">
+        <button>War-risk insurance</button>
+        <button>Flat crude price</button>
+        <button>Gasoline pump prices</button>
+      </div>
+      <div class="exp">Flat price moves first and forgets fastest. The order of stickiness runs: war-risk insurance, then freight, then grade differentials. War risk is administered off an underwriters' area listing — it spiked even on routes that physically bypassed the strait.</div>
+    </div>
+
+    <div class="q" data-ans="2">
+      <p>3. A pipeline goes into "apportionment." What is the ladder telling you?</p>
+      <div class="opts">
+        <button>The pipe's tariff just dropped</button>
+        <button>Demand for oil is falling</button>
+        <button>The cheap machine is full — differentials will widen until a costlier machine (rail, truck) turns on</button>
+      </div>
+      <div class="exp">Apportionment means nominations exceeded capacity and everyone's uncommitted volumes got cut back pro rata. Barrels now bid for the next rung up, and the location differential widens to pay for it. Watch for railcars.</div>
+    </div>
+  </div>
+</section>
+
+<section id="takeaways">
+  <div class="wrap">
+    <span class="part-label">Your Edge</span>
+    <h2>What to Take Home</h2>
+    <ol class="take">
+      <li><strong>There is no single oil price.</strong> Every barrel sits on a ladder of deliverable prices set by what stands between it and its buyer. Flat price is the most liquid and least meaningful signal.</li>
+      <li><strong>Watch the middle, not the headline.</strong> Insurance quotes, fixtures, and basis differentials aren't commentary on a disruption — they <em>are</em> the disruption, measured at the till. They confirm in real time what official statistics admit a month later.</li>
+      <li><strong>Tolls vs. options.</strong> Contracted infrastructure is a bond; spare capacity is a call option. Trading-house profits are the mark-to-market on decade-old books of physical options — not lucky directional bets.</li>
+      <li><strong>Basis is telemetry.</strong> Know the marginal machine linking two prices and its cost; that cost is fair value. A blowout through it means a rung just filled — usually before journalists know.</li>
+      <li><strong>Believe the one-year money.</strong> Spot spikes are events; period rates are convictions. And every window has a closing date printed in the shipyard orderbook — public for anyone who bothers to look.</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>This primer condenses and paraphrases "There Is No Oil Price" by <a href="https://substack.com/@scstrategist" target="_blank" rel="noopener">Strategist</a> and <a href="https://substack.com/@giacomoprandelli" target="_blank" rel="noopener">Giacomo Prandelli</a>, published on <a href="https://tscsw.substack.com/p/there-is-no-oil-price" target="_blank" rel="noopener">TSCS</a>, July 2026. All figures are as reported by the original authors; read the full article for sourcing, the trading-house census, and Parts 6–9.</p>
+  </div>
+</footer>
+
+<script>
+/* hero counter */
+(function(){
+  var el=document.getElementById('heroNum');
+  var target=-37.63,start=null,dur=1600;
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){el.textContent='−$37.63';return}
+  function step(ts){
+    if(!start)start=ts;
+    var p=Math.min((ts-start)/dur,1);
+    var eased=1-Math.pow(1-p,3);
+    var v=target*eased;
+    el.textContent=(v<0?'−$':'$')+Math.abs(v).toFixed(2);
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
+
+/* tank simulator */
+(function(){
+  var slider=document.getElementById('tankSlider'),
+      fill=document.getElementById('tankFill'),
+      val=document.getElementById('tankVal'),
+      msg=document.getElementById('tankMsg'),
+      chip=document.getElementById('tankChip');
+  function update(){
+    var v=+slider.value;
+    val.textContent=v;
+    fill.style.height=(v/76*100)+'%';
+    if(v>=72){
+      chip.textContent='Tank tops — market breaks';chip.className='chip danger';
+      msg.innerHTML='Fullness meets delivery obligation. Paper longs must receive barrels with nowhere to put them. This is April 2020: the price can go <strong>negative</strong>, down to minus the cost of destruction.';
+    }else if(v>=55){
+      chip.textContent='Crowded — squeeze risk building';chip.className='chip warn';
+      msg.innerHTML='By 17 April 2020, ~60m of 76m barrels were in and every remaining gallon was leased or spoken for. Open interest in the expiring contract was still far too high.';
+    }else if(v>22){
+      chip.textContent='Normal operations';chip.className='chip ok';
+      msg.innerHTML='Barrels cycle through. Storage is a boring toll business — throughput fees, priced like a bond. Nobody writes articles about it.';
+    }else{
+      chip.textContent='Tank bottoms — market strained';chip.className='chip warn';
+      msg.innerHTML='June 2026: Cushing near 20m barrels, at the practical minimum for blending and line fill. Bottoms don\'t break the market — they strain it with basis stress and squeeze risk into individual expiries.';
+    }
+  }
+  slider.addEventListener('input',update);
+  update();
+})();
+
+/* ladder accordions */
+document.querySelectorAll('#ladderList > li > button').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var li=btn.parentElement,open=li.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+  });
+});
+
+/* tabs */
+(function(){
+  var tabs=document.querySelectorAll('.tabs [role=tab]'),
+      panels=document.querySelectorAll('.tabpanel');
+  tabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      tabs.forEach(function(x){x.setAttribute('aria-selected','false')});
+      panels.forEach(function(p){p.classList.remove('active')});
+      t.setAttribute('aria-selected','true');
+      panels[+t.dataset.tab].classList.add('active');
+    });
+  });
+})();
+
+/* curve toggle */
+(function(){
+  var path=document.getElementById('curvePath'),
+      msg=document.getElementById('curveMsg'),
+      bC=document.getElementById('btnContango'),
+      bB=document.getElementById('btnBackward');
+  var contango='M 40 130 C 150 128, 260 70, 370 40';
+  var backward='M 40 40 C 150 45, 260 105, 370 130';
+  function set(mode){
+    if(mode==='c'){
+      path.setAttribute('d',contango);
+      bC.classList.add('on');bB.classList.remove('on');
+      msg.innerHTML='<strong>Contango:</strong> too much oil today. Deferred months trade above spot, and the curve is offering to pay anyone who can warehouse the surplus. If the spread beats storage + financing costs, the profit is locked the day both legs go on.';
+    }else{
+      path.setAttribute('d',backward);
+      bB.classList.add('on');bC.classList.remove('on');
+      msg.innerHTML='<strong>Backwardation:</strong> the market is short oil today. Spot trades over the deferreds, storage earns nothing, and inventories drain — holding barrels means holding a depreciating asset.';
+    }
+  }
+  bC.addEventListener('click',function(){set('c')});
+  bB.addEventListener('click',function(){set('b')});
+})();
+
+/* chokepoint bars + accordions */
+(function(){
+  var items=document.querySelectorAll('#chokeList li');
+  var max=23.2;
+  var seen=false;
+  function fillBars(){
+    items.forEach(function(li){
+      var span=li.querySelector('.bar span');
+      span.style.width=(+li.dataset.vol/max*100)+'%';
+    });
+  }
+  var obs=('IntersectionObserver' in window)?new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting&&!seen){seen=true;fillBars();obs.disconnect();}});
+  },{threshold:.2}):null;
+  if(obs)obs.observe(document.getElementById('chokeList'));else fillBars();
+  items.forEach(function(li){
+    li.querySelector('button').addEventListener('click',function(){
+      var open=li.classList.toggle('open');
+      li.querySelector('button').setAttribute('aria-expanded',open);
+    });
+  });
+})();
+
+/* freight spike toggle */
+(function(){
+  var line=document.getElementById('spotLine'),
+      tc=document.getElementById('tcLine'),
+      tcLegend=document.getElementById('tcLegend'),
+      msg=document.getElementById('freightMsg'),
+      yMax=document.getElementById('yMax'),
+      x1=document.getElementById('xL1'),x2=document.getElementById('xL2'),x3=document.getElementById('xL3'),
+      b20=document.getElementById('btn2020'),b26=document.getElementById('btn2026');
+  var X0=42,X1=385,Y0=170,Y1=15;
+  function pts(data,maxV){
+    return data.map(function(d){
+      var x=X0+(X1-X0)*d[0];
+      var y=Y0-(Y0-Y1)*(d[1]/maxV);
+      return x.toFixed(1)+','+y.toFixed(1);
+    }).join(' ');
+  }
+  /* [fraction of x-axis, $k/day] */
+  var d2020=[[0,30],[.18,30],[.28,265],[.42,120],[.6,60],[1,17]];
+  var d2026=[[0,50],[.15,206],[.32,600],[.5,380],[.72,300],[1,470]];
+  function set(mode){
+    if(mode==='20'){
+      line.setAttribute('points',pts(d2020,280));
+      tc.style.display='none';tcLegend.style.display='none';
+      yMax.textContent='$265k';
+      x1.textContent='Feb';x2.textContent='Mar';x3.textContent='Aug';
+      b20.classList.add('on');b26.classList.remove('on');
+      msg.innerHTML='<strong>March 2020:</strong> VLCC rates went from $30,000/day to $265,000/day in a week as the contango recruited ships as floating warehouses — then back to $17,000 by August. All inside five months.';
+    }else{
+      line.setAttribute('points',pts(d2026,640));
+      var tcy=Y0-(Y0-Y1)*(110/640);
+      tc.setAttribute('y1',tcy);tc.setAttribute('y2',tcy);
+      tc.style.display='block';tcLegend.style.display='inline';
+      yMax.textContent='$600k';
+      x1.textContent='Jan';x2.textContent='Mar';x3.textContent='Jun';
+      b26.classList.add('on');b20.classList.remove('on');
+      msg.innerHTML='<strong>2026, Hormuz:</strong> $50,000/day in January → $206,000 on 26 Feb → $600,000 mid-March → still near $470,000 on 23 June. Meanwhile 12-month charters barely moved from ~$110,000 — the gap between panic and conviction, priced daily.';
+    }
+  }
+  b20.addEventListener('click',function(){set('20')});
+  b26.addEventListener('click',function(){set('26')});
+  set('20');
+})();
+
+/* quiz */
+document.querySelectorAll('.q').forEach(function(q){
+  var ans=+q.dataset.ans;
+  q.querySelectorAll('.opts button').forEach(function(btn,i){
+    btn.addEventListener('click',function(){
+      if(q.classList.contains('done'))return;
+      q.classList.add('done');
+      if(i===ans){btn.classList.add('right');}
+      else{btn.classList.add('wrong');q.querySelectorAll('.opts button')[ans].classList.add('right');}
+    });
+  });
+});
+</script>
+</body>
+</html>
